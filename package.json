@@ -5,7 +5,7 @@
   "description": "Личный проект «Кэндишоп» от HTML Academy",
   "repository": {
     "type": "git",
-    "url": "git@github.com:htmlacademy-javascript/339269-candyshop.git"
+    "url": "git+ssh://git@github.com/htmlacademy-javascript/339269-candyshop.git"
   },
   "bugs": {
     "url": "https://github.com/htmlacademy-javascript/339269-candyshop/issues"
@@ -21,5 +21,9 @@
   },
   "engines": {
     "node": "8.11"
-  }
+  },
+  "homepage": "https://github.com/htmlacademy-javascript/339269-candyshop#readme",
+  "main": "index.js",
+  "keywords": [],
+  "author": ""
 }
