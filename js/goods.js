@@ -23,8 +23,9 @@ var findUnique = function (arr) {
   }
   return Object.keys(obj);
 };
-var getDescription = function (cards, names, pictures, content) {
-  for (var i = 0; i < cards.length; i++) {
+var getDescription = function (names, pictures, content, length) {
+  var cards = [];
+  for (var i = 0; i < length; i++) {
     cards[i] = {};
     cards[i].name = names[getRandomArray(names)];
     cards[i].picture = pictures[getRandomArray(pictures)];
@@ -44,15 +45,12 @@ var getDescription = function (cards, names, pictures, content) {
     }
     cards[i].nutritionFacts.contents = findUnique(contentPoint).join(', ');
   }
+  return cards;
 };
 
-var cardsOfSweets = [];
-cardsOfSweets.length = CARDS_OF_SWEETS_LENGTH;
-getDescription(cardsOfSweets, NAMES_OF_SWEETS, PICTURES_OF_SWEETS, CONTENT_OF_SWEETS);
+var cardsOfSweets = getDescription(NAMES_OF_SWEETS, PICTURES_OF_SWEETS, CONTENT_OF_SWEETS, CARDS_OF_SWEETS_LENGTH);
+var goodsInBasket = getDescription(NAMES_OF_SWEETS, PICTURES_OF_SWEETS, CONTENT_OF_SWEETS, GOODS_IN_BASKET_LENGTH);
 
-var goodsInBasket = [];
-goodsInBasket.length = GOODS_IN_BASKET_LENGTH;
-getDescription(goodsInBasket, NAMES_OF_SWEETS, PICTURES_OF_SWEETS, CONTENT_OF_SWEETS);
 
 document.querySelector('.catalog__cards').classList.remove('catalog__cards--load');
 document.querySelector('.catalog__load').classList.add('visually-hidden');
@@ -95,6 +93,7 @@ for (var i = 0; i < cardsOfSweets.length; i++) {
     sweetElement.querySelector('.card__characteristic').textContent = 'Без сахара. ' + cardsOfSweets[i].nutritionFacts.energy + ' ккал';
   }
   sweetElement.querySelector('.card__composition-list').textContent = cardsOfSweets[i].nutritionFacts.contents;
+  sweetElement.querySelector('.card__btn').dataset.indexNumber = i;
   cardFragment.appendChild(sweetElement);
 }
 cardList.appendChild(cardFragment);
@@ -133,12 +132,12 @@ for (var i = 0; i < hidden.lendth; i++) {
 этой кнопке должен добавляться класс card__btn-favorite--selected, 
 который помечал бы её как избранную.*/
 
-var favouriteCards = cardList.querySelectorAll('.card__btn-favorite');
-for (var i = 0; i < favouriteCards.length; i++) {
-  favouriteCards[i].addEventListener('click', function () {
-    this.classList.toggle('card__btn-favorite--selected');
-  });
-}
+cardList.addEventListener('click', function (evt) {
+  var target = evt.target;
+  if (target.classList.contains('card__btn-favorite')) {
+    target.classList.toggle('card__btn-favorite--selected');
+  }
+});
 
   /*2.Добавление выбранного товара в корзину и управление товаром в корзине
   Для корзины и для списка товаров должно существовать две независимых структуры данных.
@@ -150,21 +149,38 @@ for (var i = 0; i < favouriteCards.length; i++) {
   В корзину невозможно добавить больше товаров, чем amount - обновлять amount у соответствующего товара.
   При изменении количества товаров в корзине обновлять блок корзины в шапке .main-header__basket.*/
 
-/*var basketCard = cardList.querySelectorAll('.card__btn');
-for (var i = 0; i < basketCard.length; i++) {
-  basketCard[i].addEventListener('click', function () {
-    var elNumber = basketCard.indexOf(this);
-    console.log(elNumber);
-  });
-}*/
 cardList.addEventListener('click', function (evt) {
   var target = evt.target;
-  console.log(target);
-  var basketCard = cardList.querySelectorAll('.card__btn');
-  /*if (target.classList.contains('card__btn')) {
-    var elNumber = basketCard.indexOf(target);
-    console.log(elNumber);
-  }*/
+  if (target.classList.contains('card__btn')) {
+    var indexOfGood = target.dataset.indexNumber;
+    if (cardsOfSweets[indexOfGood].amount == 0) {
+      alert('Закончилось((');
+    }
+    else {
+      var ind = goodsInBasket.findIndex(function (goodInBasket) {
+        return goodInBasket.name == cardsOfSweets[indexOfGood].name;
+      });
+      if (ind == -1) {
+        var newGoodIBasket = Object.assign({}, cardsOfSweets[indexOfGood]);
+        newGoodIBasket.orderedAmount = 1;
+        delete newGoodIBasket.amount
+        goodsInBasket.push(newGoodIBasket);
+      } else {
+        goodsInBasket[ind].orderedAmount += 1;
+      }
+      var orderedAmounts = [];
+      goodsInBasket.forEach(function (el) {
+        orderedAmounts.push(el.orderedAmount);        
+      });
+      var totalAmount = orderedAmounts.reduce(function(result, num) {
+        return result + num;
+      }, 0);
+      cardsOfSweets[indexOfGood].amount -= 1;
+      document.querySelector('.main-header__basket').textContent = 'Сладостей в корзине: ' + totalAmount;
+      console.log(goodsInBasket);
+      console.log(orderedAmounts);
+    }
+  }  
 });
 
 /*3. Существует два способа получения товара: доставка и самовывоз. При переключении способа доставки, 
