@@ -115,21 +115,21 @@ document.querySelector('.goods__card-empty').classList.add('visually-hidden');
 
 // module4-task1
 
-/* убрать все карточки товаров, показанные на странице в списке товаров и в корзине и показать сообщения 
-о пустых блоках. В случае со списком товаров нужно показать сообщение о загрузке списка товаров,
- в случае с корзиной — сообщение о том, что блок ещё пустой.*/
+/* убрать все карточки товаров, показанные на странице в списке товаров и в корзине и показать сообщения о пустых блоках,
+В случае со списком товаров нужно показать сообщение о загрузке списка товаров,
+в случае с корзиной — сообщение о том, что блок ещё пустой.*/
 
 document.querySelector('.catalog__load').classList.remove('visually-hidden');
 document.querySelector('.goods__card-empty').classList.remove('visually-hidden');
 
-/*var hidden = basketList.querySelectorAll('.goods_card');
+/* var hidden = basketList.querySelectorAll('.goods_card');
 for (var i = 0; i < hidden.lendth; i++) {
-  hidden[i].classList.add('visually-hidden');
+   hidden[i].classList.add('visually-hidden');
 }*/
 
-/*1. Добавление выбранного товара в избранное.
-При нажатии на кнопку избранного .card__btn-favorite в карточке товара, 
-этой кнопке должен добавляться класс card__btn-favorite--selected, 
+/* 1. Добавление выбранного товара в избранное.
+При нажатии на кнопку избранного .card__btn-favorite в карточке товара,
+этой кнопке должен добавляться класс card__btn-favorite--selected,
 который помечал бы её как избранную.*/
 
 cardList.addEventListener('click', function (evt) {
@@ -139,71 +139,91 @@ cardList.addEventListener('click', function (evt) {
   }
 });
 
-  /*2.Добавление выбранного товара в корзину и управление товаром в корзине
-  Для корзины и для списка товаров должно существовать две независимых структуры данных.
-  В корзину должны копироваться объекты из списка товаров, например с помощью метода Object.assign, 
-  Объект товара в корзине и в списке должны отличаться. Например объект, который описывает 
-  товар в корзине, должен иметь свойство для записи количества товара (например orderedAmount). 
-  Убрать у товара в корзине поля, которые не используются(оставшееся количество товара).
-  Проверить, есть ли товар с таким именем в корзине и, если есть, вместо добавления увеличить кол-во на 1.
-  В корзину невозможно добавить больше товаров, чем amount - обновлять amount у соответствующего товара.
-  При изменении количества товаров в корзине обновлять блок корзины в шапке .main-header__basket.*/
+/* 2.Добавление выбранного товара в корзину и управление товаром в корзине
+   Для корзины и для списка товаров должно существовать две независимых структуры данных.
+   В корзину должны копироваться объекты из списка товаров, например с помощью метода Object.assign,
+   Объект товара в корзине и в списке должны отличаться. Например объект, который описывает
+   товар в корзине, должен иметь свойство для записи количества товара (например orderedAmount).
+   Убрать у товара в корзине поля, которые не используются(оставшееся количество товара).
+   Проверить, есть ли товар с таким именем в корзине и, если есть, вместо добавления увеличить кол-во на 1.
+   В корзину невозможно добавить больше товаров, чем amount - обновлять amount у соответствующего товара.
+   При изменении количества товаров в корзине обновлять блок корзины в шапке .main-header__basket.*/
 
 cardList.addEventListener('click', function (evt) {
   var target = evt.target;
   if (target.classList.contains('card__btn')) {
     var indexOfGood = target.dataset.indexNumber;
-    if (cardsOfSweets[indexOfGood].amount == 0) {
+    if (cardsOfSweets[indexOfGood].amount === 0) {
       alert('Закончилось((');
-    }
-    else {
-      var ind = goodsInBasket.findIndex(function (goodInBasket) {
-        return goodInBasket.name == cardsOfSweets[indexOfGood].name;
+    } else {
+      var ind = goodsInBasket.findIndex(function (basketGood) {
+        return basketGood.name === cardsOfSweets[indexOfGood].name;
       });
-      if (ind == -1) {
+      if (ind === -1) {
         var newGoodIBasket = Object.assign({}, cardsOfSweets[indexOfGood]);
         newGoodIBasket.orderedAmount = 1;
-        delete newGoodIBasket.amount
+        delete newGoodIBasket.amount;
         goodsInBasket.push(newGoodIBasket);
       } else {
         goodsInBasket[ind].orderedAmount += 1;
       }
       var orderedAmounts = [];
       goodsInBasket.forEach(function (el) {
-        orderedAmounts.push(el.orderedAmount);        
+        orderedAmounts.push(el.orderedAmount);
       });
-      var totalAmount = orderedAmounts.reduce(function(result, num) {
+      var totalAmount = orderedAmounts.reduce(function (result, num) {
         return result + num;
       }, 0);
       cardsOfSweets[indexOfGood].amount -= 1;
       document.querySelector('.main-header__basket').textContent = 'Сладостей в корзине: ' + totalAmount;
-      console.log(goodsInBasket);
-      console.log(orderedAmounts);
     }
-  }  
+  }
 });
 
-/*3. Существует два способа получения товара: доставка и самовывоз. При переключении способа доставки, 
-ниже, пользователь видит формы, соответствующие выбранному варианту. 
-Если выбрана доставка курьером, отображается форма адреса, если выбран самовывоз: форма выбора 
-ближайшего метро.
-Скрытые поля формы должны быть неактивны. 
-Например, если выбран самовывоз, поля формы отвечающие за ввод адреса должны заблокироваться.
-В этом случае можно использовать делегирование, так как кнопка,  включающая блок и сам блок связаны 
-через разметку.
-Поскольку после нажатия на таб не нужно дополнительно выяснять, какой именно таб был нажат 
-(эта информация находится в ID evt.target) и какой блок нужно показать 
-(ID таргета соответствует класс блока, который нужно показать), обработчик будет достаточно простым. 
-Единственное, что нужно учесть в этом сценарии — то, что открытую вкладку нужно спрятать, 
-добавив ей класс visually-hidden*/
+/* 3. Существует два способа получения товара: доставка и самовывоз. При переключении способа доставки,
+ ниже, пользователь видит формы, соответствующие выбранному варианту.
+ Если выбрана доставка курьером, отображается форма адреса, если выбран самовывоз: форма выбора
+ ближайшего метро.
+ Скрытые поля формы должны быть неактивны.
+ Например, если выбран самовывоз, поля формы отвечающие за ввод адреса должны заблокироваться.
+ В этом случае можно использовать делегирование, так как кнопка,  включающая блок и сам блок связаны
+ через разметку.
+ Поскольку после нажатия на таб не нужно дополнительно выяснять, какой именно таб был нажат
+ (эта информация находится в ID evt.target) и какой блок нужно показать
+ (ID таргета соответствует класс блока, который нужно показать), обработчик будет достаточно простым.
+ Единственное, что нужно учесть в этом сценарии — то, что открытую вкладку нужно спрятать,
+ добавив ей класс visually-hidden*/
 
 document.addEventListener('click', function (evt) {
   var target = evt.target;
-  if (target.id == 'deliver__store') {
+  if (target.id === 'deliver__store') {
     document.querySelector('.deliver__store').classList.remove('visually-hidden');
     document.querySelector('.deliver__courier').classList.add('visually-hidden');
-  } else if (target.id == 'deliver__courier') {
+  } else if (target.id === 'deliver__courier') {
     document.querySelector('.deliver__courier').classList.remove('visually-hidden');
     document.querySelector('.deliver__store').classList.add('visually-hidden');
+  }
+});
+
+/* 4. Процесс перетаскивания состоит из трёх этапов: захват элемента, перемещение и отпускание.
+  Пока что можем описать только отпускание, которое будет приводить к изменению значения блоков .range__price.
+  Для этого добавим на каждый пин слайдера .range__btn обработчик события mouseup, который будет согласно ТЗ
+  изменять границы минимальной и максимальной цены. Для начала можно считать что фильтр работает от 0 до 100.
+  Например, если правый пин range__btn--right отстоит от левого края шкалы на 70%, при отпускании мыши,
+  в .range__price--max должно записываться 70.*/
+
+document.addEventListener('mouseup', function (evt) {
+  var target = evt.target;
+  var catalogFilterBlock = getComputedStyle(document.querySelector('.catalog__filter'));
+  var catalogFilterBlockWidth = parseInt(catalogFilterBlock.width, 10);
+  var rangePrice = function () {
+    return Math.round(target.offsetLeft / catalogFilterBlockWidth * 100);
+  };
+  if (target.classList.contains('range__btn')) {
+    if (target.classList.contains('range__btn--right')) {
+      document.querySelector('.range__price--max').textContent = rangePrice();
+    } else if (target.classList.contains('range__btn--left')) {
+      document.querySelector('.range__price--min').textContent = rangePrice();
+    }
   }
 });
