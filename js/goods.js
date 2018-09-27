@@ -154,7 +154,16 @@ cardList.addEventListener('click', function (evt) {
   if (target.classList.contains('card__btn')) {
     var indexOfGood = target.dataset.indexNumber;
     if (cardsOfSweets[indexOfGood].amount === 0) {
-      alert('Закончилось((');
+      var divEnd = document.createElement('div');
+      var coords = target.getBoundingClientRect();
+      divEnd.style.cssText = 'color: red; position: fixed; z-index: 10';
+      divEnd.style.left = (coords.left + pageXOffset) + 'px';
+      divEnd.style.top = (coords.bottom + pageYOffset) + 'px';
+      divEnd.textContent = 'Все съели';
+      target.appendChild(divEnd);
+      setTimeout(function () {
+        target.removeChild(divEnd);
+      }, 3000);
     } else {
       var ind = goodsInBasket.findIndex(function (basketGood) {
         return basketGood.name === cardsOfSweets[indexOfGood].name;
