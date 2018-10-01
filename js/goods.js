@@ -157,10 +157,7 @@ cardList.addEventListener('click', function (evt) {
     var indexOfGood = target.dataset.indexNumber;
     if (cardsOfSweets[indexOfGood].amount === 0) {
       var divEnd = document.createElement('div');
-      // var coords = target.parentNode.getBoundingClientRect();
       divEnd.style.cssText = 'text-transform: uppercase; font-weight: bold; color: red; z-index: 10';
-      // divEnd.style.left = (coords.left + pageXOffset) + 'px';
-      // divEnd.style.top = (coords.bottom + pageYOffset) + 'px';
       divEnd.textContent = 'Все съели';
       target.parentNode.appendChild(divEnd);
       setTimeout(function () {
@@ -238,3 +235,117 @@ document.addEventListener('mouseup', function (evt) {
     }
   }
 });
+
+// module4-task2
+
+/* В этом задании мы опишем сценарии взаимодействия пользователя с формой отправки данных и саму отправку.
+Вам нужно проверить разметку вашего проекта и добавить соответствующие атрибуты и типы полей в разметку форм.
+Всем обязательным полям нужно добавить значение required.
+Проверить, правильные ли типы стоят у нужных полей и проставить этим полям дополнительные атрибуты,
+органичивающие длину значения, верхнюю и нижнюю границу и т.д.
+В разметке задаётся и адрес, на который отправляются данные формы. В шестом разделе мы выполним задание,
+в котором мы перепишем механизм отправки данных, но пока что, достаточно убедиться, что у соответствующих тегов form
+прописаны правильные атрибуты.
+
+Для проверки правильности номера карты нужно написать функцию, которая проверяет номер по Алгоритму Луна.
+Нужно разделить введённый номер карты на отдельные символы и циклом получить их сумму,
+умножая при этом нечётные позиции на два и складывая их числа между собой, если сумма больше или равна 10.
+Если полученная сумма не кратна 10: 64 % 10 !== 0, введённый номер неверен.
+
+Если форма заполнена верно, то должна показываться страница с успешно отправленными данными,
+если же форма пропустила какие-то некорректные значения, то будет показана страница с допущенными ошибками.
+В идеале у пользователя не должно быть сценария при котором он может отправить некорректную форму.
+
+Рядом с номером карты отображается статус карты. Пока данные не введены или не все данные корректны,
+отображается статус «Не определён». Когда все введённые данные корректны, статус карты меняется на «Одобрен».
+*/
+
+var cardForm = document.querySelectorAll('form')[1];
+var cardNumberInput = cardForm.querySelector('#payment__card-number');
+var cardDateInput = cardForm.querySelector('#payment__card-date');
+var cardCvcInput = cardForm.querySelector('#payment__card-cvc');
+var cardHolderInput = cardForm.querySelector('#payment__cardholder');
+var okPage = document.querySelectorAll('.modal')[1];
+var checkCardNumber = function (cardNumber) {
+  var arr = cardNumber.split('').map(function (char, index) {
+    var digit = parseInt(char, 10);
+    if ((index + cardNumber.length) % 2 === 0) {
+      var digitX2 = digit * 2;
+      return digitX2 > 9 ? digitX2 - 9 : digitX2;
+    }
+    return digit;
+  });
+  return !(arr.reduce(function (a, b) {
+    return a + b;
+  }, 0) % 10);
+};
+cardNumberInput.addEventListener('invalid', function () {
+  if (cardNumberInput.validity.tooShort || cardNumberInput.validity.tooLong) {
+    cardNumberInput.setCustomValidity('Номер карты должен состоять из 16-ти цифр');
+  } else if (!checkCardNumber(cardNumberInput.value)) {
+    cardNumberInput.setCustomValidity('Вы ввели номер карты неверно');
+  } else if (cardNumberInput.validity.valueMissing) {
+    cardNumberInput.setCustomValidity('Обязательное поле');
+  } else {
+    cardNumberInput.setCustomValidity('');
+  }
+});
+cardDateInput.addEventListener('invalid', function () {
+  if (cardDateInput.validity.patternMismatch) {
+    cardDateInput.setCustomValidity('Введите срок действия карты в формате мм/гг');
+  } else if (cardDateInput.validity.valueMissing) {
+    cardDateInput.setCustomValidity('Обязательное поле');
+  } else {
+    cardDateInput.setCustomValidity('');
+  }
+});
+cardCvcInput.addEventListener('invalid', function () {
+  if (cardCvcInput.validity.patternMismatch) {
+    cardCvcInput.setCustomValidity('Введите 3-х значный CVC-код');
+  } else if (cardCvcInput.validity.valueMissing) {
+    cardCvcInput.setCustomValidity('Обязательное поле');
+  } else {
+    cardCvcInput.setCustomValidity('');
+  }
+});
+cardHolderInput.addEventListener('invalid', function () {
+  if (cardHolderInput.validity.valueMissing) {
+    cardHolderInput.setCustomValidity('Обязательное поле');
+  } else {
+    cardHolderInput.setCustomValidity('');
+  }
+});
+cardForm.addEventListener('input', function () {
+  if (cardNumberInput.checkValidity() && cardDateInput.checkValidity() && cardCvcInput.checkValidity() && cardHolderInput.checkValidity()) {
+    cardForm.querySelector('.payment__card-status').textContent = 'Одобрен';
+  } else {
+    cardForm.querySelector('.payment__card-status').textContent = 'Не определён';
+  }
+});
+cardForm.addEventListener('submit', function (evt) {
+  evt.preventDefault();
+  okPage.classList.remove('modal--hidden');
+});
+okPage.addEventListener('click', function (evt) {
+  var target = evt.target;
+  if (target.classList.contains('modal__close')) {
+    okPage.classList.add('modal--hidden');
+  }
+});
+
+/* var divWrongNumber = document.createElement('div');
+divWrongNumber.style.cssText = 'font-weight: bold; border: 1px solid black; background-color: white; display: none';
+divWronчgNumber.textContent = 'Вы ввели номер карты неверно';
+cardForm.querySelector('.payment__input-wrap--card-number').appendChild(divWrongNumber);
+cardForm.addEventListener('submit', function (evt) {
+  evt.preventDefault();
+  if (!checkCardNumber(cardNumberInput.value)) {
+    divWrongNumber.style.display = 'block';
+    setTimeout(function () {
+      divWrongNumber.style.display = 'none';
+    }, 2000);
+  } else {
+    okPage.classList.remove('modal--hidden');
+  }
+});*/
+
