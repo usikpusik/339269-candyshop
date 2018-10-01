@@ -135,6 +135,7 @@ for (var i = 0; i < hidden.lendth; i++) {
 cardList.addEventListener('click', function (evt) {
   var target = evt.target;
   if (target.classList.contains('card__btn-favorite')) {
+    evt.preventDefault();
     target.classList.toggle('card__btn-favorite--selected');
   }
 });
@@ -152,17 +153,18 @@ cardList.addEventListener('click', function (evt) {
 cardList.addEventListener('click', function (evt) {
   var target = evt.target;
   if (target.classList.contains('card__btn')) {
+    evt.preventDefault();
     var indexOfGood = target.dataset.indexNumber;
     if (cardsOfSweets[indexOfGood].amount === 0) {
       var divEnd = document.createElement('div');
-      var coords = target.getBoundingClientRect();
-      divEnd.style.cssText = 'color: red; position: fixed; z-index: 10';
-      divEnd.style.left = (coords.left + pageXOffset) + 'px';
-      divEnd.style.top = (coords.bottom + pageYOffset) + 'px';
+      // var coords = target.parentNode.getBoundingClientRect();
+      divEnd.style.cssText = 'text-transform: uppercase; font-weight: bold; color: red; z-index: 10';
+      // divEnd.style.left = (coords.left + pageXOffset) + 'px';
+      // divEnd.style.top = (coords.bottom + pageYOffset) + 'px';
       divEnd.textContent = 'Все съели';
-      target.appendChild(divEnd);
+      target.parentNode.appendChild(divEnd);
       setTimeout(function () {
-        target.removeChild(divEnd);
+        target.parentNode.removeChild(divEnd);
       }, 3000);
     } else {
       var ind = goodsInBasket.findIndex(function (basketGood) {
