@@ -306,3 +306,71 @@
   });
 }());
 
+
+// slider.js
+
+var rangeFilter = document.querySelector('.range__filter');
+var rangeFilterLine = rangeFilter.querySelector('.range__fill-line');
+// var priceMin = document.querySelector('.range__price--min');
+// var priceMax = document.querySelector('.range__price--max');
+var priceHandleLeft = rangeFilter.querySelector('.range__btn--left');
+var priceHandleRight = rangeFilter.querySelector('.range__btn--right');
+
+var rangeFilterCoords = rangeFilter.getBoundingClientRect();
+
+// var rangeFilterStyle = getComputedStyle(rangeFilter);
+// var rangeButtonStyle = getComputedStyle(rangeFilter.querySelector('.range__btn'));
+// var rangeFilterStyleWidth = parseInt(rangeFilterStyle.width, 10);
+// var rangeButtonWidth = parseInt(rangeButtonStyle.width, 10);
+// var priceHandleCenter = rangeButtonWidth / 2;
+// var allPrices = cardsOfSweets.map(function (el) {
+//   return el.price;
+// });
+// var maxPrice = Math.max.apply(null, allPrices);
+// var minPrice = Math.min.apply(null, allPrices);
+//
+// var getPriceText = function (price, priceHandle) {
+//   price.textContent = minPrice + Math.round(parseInt((priceHandle.offsetLeft + priceHandleCenter), 10) / rangeFilterStyleWidth * (maxPrice - minPrice));
+// };
+// getPriceText(priceMin, priceHandleLeft);
+// getPriceText(priceMax, priceHandleRight);
+
+priceHandleLeft.onmousedown = function (evt) {
+  evt.preventDefault();
+
+  var priceHandleLeftCoords = priceHandleLeft.getBoundingClientRect();
+  var shiftX = event.clientX - priceHandleLeftCoords.left;
+  document.addEventListener('mousemove', onMouseMove);
+  document.addEventListener('mouseup', onMouseUp);
+
+  function onMouseMove(event) {
+    var newLeft = event.clientX - shiftX - rangeFilterCoords.left;
+
+    var priceHandleRightCoords = priceHandleRight.getBoundingClientRect();
+    if (newLeft < 0) {
+      newLeft = 0;
+    }
+
+    var rightEdge = rangeFilter.offsetWidth - priceHandleLeft.offsetWidth;
+    if (newLeft > rightEdge) {
+      newLeft = rightEdge;
+    }
+
+    if (newLeft > priceHandleRightCoords.left) {
+      newLeft = priceHandleRightCoords.left - 16;
+    }
+
+    priceHandleLeft.style.left = newLeft + 'px';
+    rangeFilterLine.style.left = priceHandleLeft.style.left;
+  }
+
+  function onMouseUp() {
+    document.removeEventListener('mouseup', onMouseUp);
+    document.removeEventListener('mousemove', onMouseMove);
+  }
+};
+
+priceHandleLeft.ondragstart = function () {
+  return false;
+};
+
